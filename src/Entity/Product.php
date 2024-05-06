@@ -5,8 +5,16 @@ namespace App\Entity;
 use App\Repository\ProductRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\DiscriminatorColumn;
+use Doctrine\ORM\Mapping\DiscriminatorMap;
+use Doctrine\ORM\Mapping\InheritanceType;
+use Doctrine\ORM\Mapping\MappedSuperclass;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
+#[MappedSuperclass]
+#[InheritanceType('SINGLE_TABLE')]
+#[DiscriminatorColumn(name: 'kind', type: 'string')]
+#[DiscriminatorMap(['drink' => Drink::class, 'dish' => Dish::class])]
 class Product
 {
     #[ORM\Id]
