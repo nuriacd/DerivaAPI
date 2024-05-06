@@ -16,7 +16,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[MappedSuperclass]
 #[InheritanceType('SINGLE_TABLE')]
 #[DiscriminatorColumn(name: 'role', type: 'string')]
-#[DiscriminatorMap(['user' => User::class, 'employee' => Employee::class])]
+#[DiscriminatorMap(['client' => Client::class, 'employee' => Employee::class])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\DishRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -14,6 +16,17 @@ class Dish extends Product
 
     #[ORM\Column(length: 5000)]
     private ?string $recipe = null;
+
+    /**
+     * @var Collection<int, ingredient>
+     */
+    #[ORM\ManyToMany(targetEntity: ingredient::class)]
+    private Collection $ingredients;
+
+    public function __construct()
+    {
+        $this->ingredients = new ArrayCollection();
+    }
 
     public function getType(): ?string
     {
@@ -34,6 +47,30 @@ class Dish extends Product
     public function setRecipe(string $recipe): static
     {
         $this->recipe = $recipe;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ingredient>
+     */
+    public function getIngredients(): Collection
+    {
+        return $this->ingredients;
+    }
+
+    public function addIngredient(ingredient $ingredient): static
+    {
+        if (!$this->ingredients->contains($ingredient)) {
+            $this->ingredients->add($ingredient);
+        }
+
+        return $this;
+    }
+
+    public function removeIngredient(ingredient $ingredient): static
+    {
+        $this->ingredients->removeElement($ingredient);
 
         return $this;
     }

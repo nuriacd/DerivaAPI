@@ -33,9 +33,23 @@ class Restaurant
     #[ORM\OneToMany(targetEntity: Employee::class, mappedBy: 'restaurant')]
     private Collection $employees;
 
+    /**
+     * @var Collection<int, drink>
+     */
+    #[ORM\ManyToMany(targetEntity: drink::class)]
+    private Collection $drinks;
+
+    /**
+     * @var Collection<int, ingredient>
+     */
+    #[ORM\ManyToMany(targetEntity: ingredient::class)]
+    private Collection $ingredients;
+
     public function __construct()
     {
         $this->employees = new ArrayCollection();
+        $this->drinks = new ArrayCollection();
+        $this->ingredients = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -117,6 +131,54 @@ class Restaurant
                 $employee->setRestaurant(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, drink>
+     */
+    public function getDrinks(): Collection
+    {
+        return $this->drinks;
+    }
+
+    public function addDrink(drink $drink): static
+    {
+        if (!$this->drinks->contains($drink)) {
+            $this->drinks->add($drink);
+        }
+
+        return $this;
+    }
+
+    public function removeDrink(drink $drink): static
+    {
+        $this->drinks->removeElement($drink);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ingredient>
+     */
+    public function getIngredients(): Collection
+    {
+        return $this->ingredients;
+    }
+
+    public function addIngredient(ingredient $ingredient): static
+    {
+        if (!$this->ingredients->contains($ingredient)) {
+            $this->ingredients->add($ingredient);
+        }
+
+        return $this;
+    }
+
+    public function removeIngredient(ingredient $ingredient): static
+    {
+        $this->ingredients->removeElement($ingredient);
 
         return $this;
     }
