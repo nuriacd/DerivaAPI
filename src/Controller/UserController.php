@@ -82,6 +82,11 @@ class UserController extends AbstractController
             $user->setPhone($phone);
             $user->setPassword($this->hashPwd($passwordHasher, $pwd, $user));
 
+            if ($user instanceof Employee) {
+                $user->setType($data["type"]);
+                $user->setRestaurant($data["restaurant"]);
+            }
+
             $errors = $validator->validate($user);
             if (count($errors)  > 0) 
                 return new JsonResponse(['message' => (string) $errors], Response::HTTP_BAD_REQUEST);
