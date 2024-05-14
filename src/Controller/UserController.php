@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Client;
 use App\Entity\Employee;
 use App\Entity\User;
+use App\Repository\ClientRepository;
+use App\Repository\EmployeeRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -64,6 +66,47 @@ class UserController extends AbstractController
         ];
     }
 
+    #[Route('/clients', name: 'app_user_index', methods: ['GET'])]
+    function getClients(ClientRepository $clientRepository): JsonResponse
+    {
+        $users = $clientRepository->findAll();
+
+        if (count($users) > 0) 
+        {
+            foreach ($users as $user) {
+                $clients = [];
+                
+                if ($user instanceof Client) {
+                    $clients[] = $this->clientModel($user);
+                }
+            }
+            return new JsonResponse($clients, Response::HTTP_OK);
+        }
+
+        return new JsonResponse(['message' => 'No users found.'], Response::HTTP_NOT_FOUND);
+
+    }
+
+    #[Route('/employees', name: 'app_user_index', methods: ['GET'])]
+    function getEmployees(EmployeeRepository $employeeRepository): JsonResponse
+    {
+        $users = $employeeRepository->findAll();
+
+        if (count($users) > 0) 
+        {
+            foreach ($users as $user) {
+                $employees = [];
+                
+                if ($user instanceof Client) {
+                    $employees[] = $this->clientModel($user);
+                }
+            }
+            return new JsonResponse($employees, Response::HTTP_OK);
+        }
+
+        return new JsonResponse(['message' => 'No users found.'], Response::HTTP_NOT_FOUND);
+    }
+
     #[Route('/new', name: 'app_user_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): JsonResponse
     {
@@ -75,17 +118,12 @@ class UserController extends AbstractController
 
         if ($validPwd && $validPhone)
         {
-            $user = new User();
+            $user = new Client();
 
             $user->setName($name);
             $user->setEmail($email);
             $user->setPhone($phone);
             $user->setPassword($this->hashPwd($passwordHasher, $pwd, $user));
-
-            if ($user instanceof Employee) {
-                $user->setType($data["type"]);
-                $user->setRestaurant($data["restaurant"]);
-            }
 
             $errors = $validator->validate($user);
             if (count($errors)  > 0) 
@@ -99,6 +137,40 @@ class UserController extends AbstractController
 
         return new JsonResponse (['message' => 'Incorrect password and/or phone'], Response::HTTP_BAD_REQUEST);
 
+    }
+    
+    #[Route('/new/employee', name: 'app_employee_new', methods: ['POST'])]
+    public function newEmployee(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): JsonResponse
+    {
+        $data = json_decode($request->getContent(),true);
+        $name = $data["name"]; $email = $data["email"]; $phone = $data["phone"]; $pwd = $data["pwd"]; $pwd2 = $data["pwd2"];
+        $type = $data["type"]; $restaurant = $data["restaurant"];
+
+        $validPwd = $this->checkPwd($pwd, $pwd2);
+        $validPhone = $this->checkPhone($phone);
+
+        if ($validPwd && $validPhone)
+        {
+            $employee = new Employee();
+
+            $employee->setName($name);
+            $employee->setEmail($email);
+            $employee->setPhone($phone);
+            $employee->setType($type);
+            $employee->setRestaurant($restaurant);
+            $employee->setPassword($this->hashPwd($passwordHasher, $pwd, $employee));
+
+            $errors = $validator->validate($employee);
+            if (count($errors)  > 0) 
+                return new JsonResponse(['message' => (string) $errors], Response::HTTP_BAD_REQUEST);
+            
+            $entityManager->persist($employee);
+            $entityManager->flush();
+
+            return new JsonResponse (['message' => 'Employee created successfully'], Response::HTTP_CREATED);
+        }
+
+        return new JsonResponse (['message' => 'Incorrect password and/or phone'], Response::HTTP_BAD_REQUEST);
     }
 
     private function checkPwd(string $pwd, string $pwd2): bool
