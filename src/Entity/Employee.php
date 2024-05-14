@@ -16,8 +16,8 @@ class Employee extends User
     private ?string $type = null;
 
     #[ORM\ManyToOne(inversedBy: 'employees')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?restaurant $restaurant = null;
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Restaurant $restaurant = null;
 
     public function getType(): ?string
     {
@@ -30,12 +30,12 @@ class Employee extends User
         return $this;
     }
 
-    public function getRestaurant(): ?restaurant
+    public function getRestaurant(): ?Restaurant
     {
         return $this->restaurant;
     }
 
-    public function setRestaurant(?restaurant $restaurant): static
+    public function setRestaurant(?Restaurant $restaurant): static
     {
         $this->restaurant = $restaurant;
 

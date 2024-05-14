@@ -13,6 +13,13 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/restaurant')]
 class RestaurantController extends AbstractController
 {
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     #[Route('/', name: 'app_restaurant_index', methods: ['GET'])]
     public function index(RestaurantRepository $restaurantRepository): JsonResponse
     {
@@ -103,5 +110,13 @@ class RestaurantController extends AbstractController
         $entityManager->remove($restaurant);
         $entityManager->flush();
         return new JsonResponse(['message' => 'Restaurant deleted successfully'], Response::HTTP_OK);
+    }
+
+    public function getRestaurant(string $id): Restaurant | bool
+    {
+        $restaurant = $this->entityManager->getRepository(Restaurant::class)->findOneBy(['name' => $id]);
+
+        return $restaurant ? $restaurant : false;
+        
     }
 }

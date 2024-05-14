@@ -18,9 +18,9 @@ class Dish extends Product
     private ?string $recipe = null;
 
     /**
-     * @var Collection<int, ingredient>
+     * @var Collection<int, Ingredient>
      */
-    #[ORM\ManyToMany(targetEntity: ingredient::class)]
+    #[ORM\ManyToMany(targetEntity: Ingredient::class)]
     private Collection $ingredients;
 
     public function __construct()
@@ -52,14 +52,14 @@ class Dish extends Product
     }
 
     /**
-     * @return Collection<int, ingredient>
+     * @return Collection<int, Ingredient>
      */
     public function getIngredients(): Collection
     {
         return $this->ingredients;
     }
 
-    public function addIngredient(ingredient $ingredient): static
+    public function addIngredient(Ingredient $ingredient): static
     {
         if (!$this->ingredients->contains($ingredient)) {
             $this->ingredients->add($ingredient);
@@ -68,7 +68,7 @@ class Dish extends Product
         return $this;
     }
 
-    public function removeIngredient(ingredient $ingredient): static
+    public function removeIngredient(Ingredient $ingredient): static
     {
         $this->ingredients->removeElement($ingredient);
 

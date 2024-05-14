@@ -66,19 +66,17 @@ class UserController extends AbstractController
         ];
     }
 
-    #[Route('/clients', name: 'app_user_index', methods: ['GET'])]
+    #[Route('/clients', name: 'app_client_index', methods: ['GET'])]
     function getClients(ClientRepository $clientRepository): JsonResponse
     {
         $users = $clientRepository->findAll();
 
         if (count($users) > 0) 
         {
+            $clients = [];
+
             foreach ($users as $user) {
-                $clients = [];
-                
-                if ($user instanceof Client) {
-                    $clients[] = $this->clientModel($user);
-                }
+                $clients[] = $this->clientModel($user);
             }
             return new JsonResponse($clients, Response::HTTP_OK);
         }
@@ -87,19 +85,17 @@ class UserController extends AbstractController
 
     }
 
-    #[Route('/employees', name: 'app_user_index', methods: ['GET'])]
+    #[Route('/employees', name: 'app_employees_index', methods: ['GET'])]
     function getEmployees(EmployeeRepository $employeeRepository): JsonResponse
     {
         $users = $employeeRepository->findAll();
 
         if (count($users) > 0) 
         {
+            $employees = [];
+
             foreach ($users as $user) {
-                $employees = [];
-                
-                if ($user instanceof Client) {
-                    $employees[] = $this->clientModel($user);
-                }
+                $employees[] = $this->employeeModel($user);
             }
             return new JsonResponse($employees, Response::HTTP_OK);
         }
@@ -144,7 +140,7 @@ class UserController extends AbstractController
     {
         $data = json_decode($request->getContent(),true);
         $name = $data["name"]; $email = $data["email"]; $phone = $data["phone"]; $pwd = $data["pwd"]; $pwd2 = $data["pwd2"];
-        $type = $data["type"]; $restaurant = $data["restaurant"];
+        $type = "employee";
 
         $validPwd = $this->checkPwd($pwd, $pwd2);
         $validPhone = $this->checkPhone($phone);
@@ -157,8 +153,9 @@ class UserController extends AbstractController
             $employee->setEmail($email);
             $employee->setPhone($phone);
             $employee->setType($type);
-            $employee->setRestaurant($restaurant);
+
             $employee->setPassword($this->hashPwd($passwordHasher, $pwd, $employee));
+            $employee->setRoles(['ROLE_EMPLOYEE']);
 
             $errors = $validator->validate($employee);
             if (count($errors)  > 0) 
@@ -203,7 +200,7 @@ class UserController extends AbstractController
         return $hashedPassword;
     }
 
-    #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
+    #[Route('/{id}/get', name: 'app_user_show', methods: ['GET'])]
     public function show(EntityManagerInterface $entityManager, string $id): Response
     {
         $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $id]);
@@ -280,7 +277,7 @@ class UserController extends AbstractController
         return new JsonResponse (['message' => 'Incorrect or phone'], Response::HTTP_BAD_REQUEST);
     }
 
-    #[Route('/{id}', name: 'app_user_delete', methods: ['DELETE'])]
+    #[Route('/{id}/delete', name: 'app_user_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, $id): Response
     {
         $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $id]);
@@ -298,7 +295,7 @@ class UserController extends AbstractController
     public function login (JWTTokenManagerInterface $JWTManager, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, Request $request): Response
     {
         $data = json_decode($request->getContent(), true);
-        $email = $data["email"]; $password = $data["password"];
+        $email = $data["loginEmail"]; $password = $data["loginPassword"];
         
         $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
 

@@ -39,15 +39,15 @@ class Restaurant
     private Collection $employees;
 
     /**
-     * @var Collection<int, drink>
+     * @var Collection<int, Drink>
      */
-    #[ORM\ManyToMany(targetEntity: drink::class)]
+    #[ORM\ManyToMany(targetEntity: Drink::class)]
     private Collection $drinks;
 
     /**
-     * @var Collection<int, ingredient>
+     * @var Collection<int, Ingredient>
      */
-    #[ORM\ManyToMany(targetEntity: ingredient::class)]
+    #[ORM\ManyToMany(targetEntity: Ingredient::class)]
     private Collection $ingredients;
 
     public function __construct()
@@ -141,14 +141,14 @@ class Restaurant
     }
 
     /**
-     * @return Collection<int, drink>
+     * @return Collection<int, Drink>
      */
     public function getDrinks(): Collection
     {
         return $this->drinks;
     }
 
-    public function addDrink(drink $drink): static
+    public function addDrink(Drink $drink): static
     {
         if (!$this->drinks->contains($drink)) {
             $this->drinks->add($drink);
@@ -157,7 +157,7 @@ class Restaurant
         return $this;
     }
 
-    public function removeDrink(drink $drink): static
+    public function removeDrink(Drink $drink): static
     {
         $this->drinks->removeElement($drink);
 
@@ -165,14 +165,14 @@ class Restaurant
     }
 
     /**
-     * @return Collection<int, ingredient>
+     * @return Collection<int, Ingredient>
      */
     public function getIngredients(): Collection
     {
         return $this->ingredients;
     }
 
-    public function addIngredient(ingredient $ingredient): static
+    public function addIngredient(Ingredient $ingredient): static
     {
         if (!$this->ingredients->contains($ingredient)) {
             $this->ingredients->add($ingredient);
@@ -181,7 +181,7 @@ class Restaurant
         return $this;
     }
 
-    public function removeIngredient(ingredient $ingredient): static
+    public function removeIngredient(Ingredient $ingredient): static
     {
         $this->ingredients->removeElement($ingredient);
 

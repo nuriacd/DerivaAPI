@@ -31,9 +31,9 @@ class Order
     private ?Client $client = null;
 
     /**
-     * @var Collection<int, product>
+     * @var Collection<int, Product>
      */
-    #[ORM\ManyToMany(targetEntity: product::class)]
+    #[ORM\ManyToMany(targetEntity: Product::class)]
     private Collection $products;
 
     #[ORM\Column(length: 10)]
@@ -98,14 +98,14 @@ class Order
     }
 
     /**
-     * @return Collection<int, product>
+     * @return Collection<int, Product>
      */
     public function getProducts(): Collection
     {
         return $this->products;
     }
 
-    public function addProduct(product $product): static
+    public function addProduct(Product $product): static
     {
         if (!$this->products->contains($product)) {
             $this->products->add($product);
@@ -114,7 +114,7 @@ class Order
         return $this;
     }
 
-    public function removeProduct(product $product): static
+    public function removeProduct(Product $product): static
     {
         $this->products->removeElement($product);
 
