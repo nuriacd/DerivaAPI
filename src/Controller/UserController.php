@@ -278,7 +278,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'app_user_delete', methods: ['DELETE'])]
-    public function delete(EntityManagerInterface $entityManager, $id): Response
+    public function delete(EntityManagerInterface $entityManager, $id): JsonResponse
     {
         $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $id]);
 
@@ -292,7 +292,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/login', name: 'app_user_login', methods: ['POST'])]
-    public function login (JWTTokenManagerInterface $JWTManager, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, Request $request): Response
+    public function login (JWTTokenManagerInterface $JWTManager, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $email = $data["loginEmail"]; $password = $data["loginPassword"];
@@ -302,7 +302,6 @@ class UserController extends AbstractController
         if ($user && $passwordHasher->isPasswordValid($user, $password))
         {
             $token = $JWTManager->create($user);  
-
             return new JsonResponse(['token' => $token], Response::HTTP_OK);
         }
         
@@ -310,7 +309,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/checkPwd', name: 'app_user_checkPwd', methods: ['POST'])]
-    public function checkPassword (EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, Request $request, $id): Response
+    public function checkPassword (EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, Request $request, $id): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $password = $data["password"];
