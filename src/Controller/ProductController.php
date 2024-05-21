@@ -130,4 +130,6 @@ class ProductController extends AbstractController
         $entityManager->flush();
         return new JsonResponse(['message' => 'Product deleted successfully'], Response::HTTP_OK);
     }
+
+    
 }

@@ -107,7 +107,7 @@ class UserController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): JsonResponse
     {
         $data = json_decode($request->getContent(),true);
-        $name = $data["name"]; $email = $data["email"]; $phone = $data["phone"]; $pwd = $data["pwd"]; $pwd2 = $data["pwd2"];
+        $name = $data["name"]; $email = $data["email"]; $phone = $data["phone"]; $pwd = $data["password"]; $pwd2 = $data["password2"];
 
         $validPwd = $this->checkPwd($pwd, $pwd2);
         $validPhone = $this->checkPhone($phone);
@@ -139,7 +139,7 @@ class UserController extends AbstractController
     public function newEmployee(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): JsonResponse
     {
         $data = json_decode($request->getContent(),true);
-        $name = $data["name"]; $email = $data["email"]; $phone = $data["phone"]; $pwd = $data["pwd"]; $pwd2 = $data["pwd2"];
+        $name = $data["name"]; $email = $data["email"]; $phone = $data["phone"]; $pwd = $data["password"]; $pwd2 = $data["password2"];
         $type = "employee";
 
         $validPwd = $this->checkPwd($pwd, $pwd2);
