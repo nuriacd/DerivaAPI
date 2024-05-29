@@ -19,8 +19,8 @@ class Ingredient
     #[ORM\Column(length: 255)]
     private ?string $supplier = null;
 
-    #[ORM\Column]
-    private array $allergen = [];
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $allergen = null;
 
     public function getId(): ?int
     {
@@ -51,12 +51,12 @@ class Ingredient
         return $this;
     }
 
-    public function getAllergen(): array
+    public function getAllergen(): ?string
     {
         return $this->allergen;
     }
 
-    public function setAllergen(array $allergen): static
+    public function setAllergen(string $allergen): static
     {
         $this->allergen = $allergen;
 

@@ -39,6 +39,9 @@ class Order
     #[ORM\Column(length: 10)]
     private ?string $date = null;
 
+    #[ORM\ManyToOne]
+    private ?Restaurant $restaurant = null;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
@@ -129,6 +132,18 @@ class Order
     public function setDate(string $date): static
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    public function getRestaurant(): ?Restaurant
+    {
+        return $this->restaurant;
+    }
+
+    public function setRestaurant(?Restaurant $restaurant): static
+    {
+        $this->restaurant = $restaurant;
 
         return $this;
     }

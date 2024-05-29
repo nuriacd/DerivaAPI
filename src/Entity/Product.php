@@ -22,7 +22,7 @@ class Product
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 100)]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
@@ -30,6 +30,9 @@ class Product
 
     #[ORM\Column(length: 1000)]
     private ?string $description = null;
+
+    #[ORM\Column(type: Types::BLOB, nullable: true)]
+    private $image = null;
 
     public function getId(): ?int
     {
@@ -68,6 +71,18 @@ class Product
     public function setDescription(string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    public function setImage($image): static
+    {
+        $this->image = $image;
 
         return $this;
     }

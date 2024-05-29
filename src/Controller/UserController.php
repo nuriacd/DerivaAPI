@@ -48,6 +48,7 @@ class UserController extends AbstractController
     {
         return 
         [
+            'id'  => $user->getId(),
             'name'  => $user->getName(),
             'email'  => $user->getEmail(),
             'phone'  => $user->getPhone(),
@@ -58,6 +59,7 @@ class UserController extends AbstractController
     {
         return
         [
+            'id'  => $user->getId(),
             'name'  => $user->getName(),
             'email'  => $user->getEmail(),
             'phone'  => $user->getPhone(),

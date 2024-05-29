@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Entity\Dish;
+use App\Entity\Drink;
 use App\Entity\Product;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -44,6 +45,7 @@ class ProductController extends AbstractController
             'name'  => $product->getName(),
             'price'  => $product->getPrice(),
             'description'  => $product->getDescription(),
+            'image' => $this->generateImageUrl($product->getImage()),
         ];
     }
 
@@ -130,6 +132,75 @@ class ProductController extends AbstractController
         $entityManager->flush();
         return new JsonResponse(['message' => 'Product deleted successfully'], Response::HTTP_OK);
     }
+
+    #[Route('/{id}/img', name: 'app_product_image', methods: ['PUT'])]
+    public function addImage(Request $request, EntityManagerInterface $entityManager, string $id): JsonResponse
+    {
+        $product = $entityManager->getRepository(Product::class)->find($id);
+        if (!$product)
+            return new JsonResponse(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
+        
+        $data = json_decode($request->getContent(),true);
+        $image = $data["image"];
+
+        if ($image) {
+            $product->setImage($image);
+            $entityManager->flush();
+            return new JsonResponse(['message' => 'Image added successfully'], Response::HTTP_OK);
+        }
+        return new JsonResponse(['message' => 'Image not found'], Response::HTTP_NOT_FOUND);
+    }
+
+    #[Route('/drinks/get', name: 'app_drink_list', methods: ['GET'])]
+    public function listDrinks(EntityManagerInterface $entityManager): Response
+    {
+        $drinks = $entityManager->getRepository(Drink::class)->findAll();
+
+        if (!$drinks)
+            return new JsonResponse(['message' => 'No drinks found'], Response::HTTP_NOT_FOUND);
+
+        $drinksArray = [];
+        foreach ($drinks as $drink) {
+            $drinksArray[] = [
+                'id' => $drink->getId(),
+                'name' => $drink->getName(),
+                'price' => $drink->getPrice(),
+                'description' => $drink->getDescription(),
+                'image' => $this->generateImageUrl($drink->getImage()),
+            ];
+        }
+
+        return new JsonResponse($drinksArray, Response::HTTP_OK);
+    }
+
+    private function generateImageUrl($image): string
+    {
+        return 'data:image/jpeg;base64,'.base64_encode(stream_get_contents($image));
+    }
+
+    #[Route('/dishes/get', name: 'app_dishes_list', methods: ['GET'])]
+    public function listDishes(EntityManagerInterface $entityManager): Response
+    {
+        $dishes = $entityManager->getRepository(Dish::class)->findAll();
+
+        if (!$dishes)
+            return new JsonResponse(['message' => 'No dishes found'], Response::HTTP_NOT_FOUND);
+
+        $dishesArray = [];
+        foreach ($dishes as $dish) {
+            $dishesArray[] = [
+                'id' => $dish->getId(),
+                'name' => $dish->getName(),
+                'price' => $dish->getPrice(),
+                'description' => $dish->getDescription(),
+                'type' => $dish->getType(),
+                'image' => $this->generateImageUrl($dish->getImage()),
+            ];
+        }
+
+        return new JsonResponse($dishesArray, Response::HTTP_OK);
+    }
+
 
     
 }

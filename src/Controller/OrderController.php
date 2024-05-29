@@ -151,4 +151,20 @@ class OrderController extends AbstractController
         return new JsonResponse(['message' => 'No pending orders found.'], Response::HTTP_NOT_FOUND);
     }
 
+    #[Route('/restaurant/{id}', name: 'app_order_restaurant', methods: ['GET'])]
+    public function getRestaurantOrders(OrderRepository $orderRepository, $id): JsonResponse
+    {
+        $orders = $orderRepository->findBy(['restaurant' => $id]);
+
+        if (count($orders) > 0) 
+        {
+            $orderList = [];
+            foreach ($orders as $order) {
+                $orderList[] = $this->orderModel($order);
+            }
+            return new JsonResponse($orderList, Response::HTTP_OK);
+        }
+        return new JsonResponse(['message' => 'No orders found for this restaurant.'], Response::HTTP_NOT_FOUND);
+    }
+
 }
