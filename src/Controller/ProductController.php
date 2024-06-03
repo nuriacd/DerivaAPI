@@ -201,6 +201,6 @@ class ProductController extends AbstractController
         return new JsonResponse($dishesArray, Response::HTTP_OK);
     }
 
-
+ 
     
 }

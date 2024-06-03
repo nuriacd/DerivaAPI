@@ -54,7 +54,7 @@ class OrderController extends AbstractController
         $address = $data["address"];
         $price = $data["price"];
         $client = $data["client"];
-        $products = explode(",", $data["products"]);
+        $products = $data["products"];
         $date = $data["date"];
 
         $order = new Order();
@@ -65,7 +65,7 @@ class OrderController extends AbstractController
         $order->setDate($date);
 
         foreach ($products as $stringProduct) {
-            $product = $entityManager->getRepository(Product::class)->findOneBy(['name' => $stringProduct]);
+            $product = $entityManager->getRepository(Product::class)->find($stringProduct['id']);
             $order->addProduct($product);
         }
 
@@ -100,7 +100,7 @@ class OrderController extends AbstractController
         $products = $data["products"];
         $date = $data["date"];
 
-        $order = $entityManager->getRepository(Order::class)->findOneBy(['id' => $id]);
+        $order = $entityManager->getRepository(Order::class)->find($id);
         if (!$order)
             return new JsonResponse(['message' => 'Order not found'], Response::HTTP_NOT_FOUND);
         
@@ -111,7 +111,7 @@ class OrderController extends AbstractController
         $order->setDate($date);
 
         foreach ($products as $stringProduct) {
-            $product = $entityManager->getRepository(Product::class)->findOneBy(['name' => $stringProduct]);
+            $product = $entityManager->getRepository(Product::class)->find($stringProduct['id']);
             $order->addProduct($product);
         }
 
@@ -121,6 +121,26 @@ class OrderController extends AbstractController
         
         $entityManager->flush();
         return new JsonResponse (['message' => 'Order updated successfully'], Response::HTTP_OK);
+    }
+    
+    #[Route('/{id}/status', name: 'app_edit_status', methods: ['PUT'])]
+    public function editStatus(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, string $id): JsonResponse
+    {
+        $data = json_decode($request->getContent(),true);
+        $status = $data["status"];
+
+        $order = $entityManager->getRepository(Order::class)->find($id);
+        if (!$order)
+            return new JsonResponse(['message' => 'Order not found'], Response::HTTP_NOT_FOUND);
+        
+        $order->setStatus($status);
+
+        $errors = $validator->validate($order);
+        if (count($errors)  > 0)
+            return new JsonResponse(['message' => (string) $errors], Response::HTTP_BAD_REQUEST);
+        
+        $entityManager->flush();
+        return new JsonResponse (['message' => 'Order status updated successfully'], Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'app_order_delete', methods: ['DELETE'])]
@@ -166,5 +186,6 @@ class OrderController extends AbstractController
         }
         return new JsonResponse(['message' => 'No orders found for this restaurant.'], Response::HTTP_NOT_FOUND);
     }
+
 
 }
