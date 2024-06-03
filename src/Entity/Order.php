@@ -30,21 +30,21 @@ class Order
     #[ORM\JoinColumn(nullable: false)]
     private ?Client $client = null;
 
-    /**
-     * @var Collection<int, Product>
-     */
-    #[ORM\ManyToMany(targetEntity: Product::class)]
-    private Collection $products;
-
     #[ORM\Column(length: 10)]
     private ?string $date = null;
 
     #[ORM\ManyToOne]
     private ?Restaurant $restaurant = null;
 
+    /**
+     * @var Collection<int, OrderProduct>
+     */
+    #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'order_id', orphanRemoval: true)]
+    private Collection $orderProducts;
+
     public function __construct()
     {
-        $this->products = new ArrayCollection();
+        $this->orderProducts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -100,30 +100,6 @@ class Order
         return $this;
     }
 
-    /**
-     * @return Collection<int, Product>
-     */
-    public function getProducts(): Collection
-    {
-        return $this->products;
-    }
-
-    public function addProduct(Product $product): static
-    {
-        if (!$this->products->contains($product)) {
-            $this->products->add($product);
-        }
-
-        return $this;
-    }
-
-    public function removeProduct(Product $product): static
-    {
-        $this->products->removeElement($product);
-
-        return $this;
-    }
-
     public function getDate(): ?string
     {
         return $this->date;
@@ -144,6 +120,36 @@ class Order
     public function setRestaurant(?Restaurant $restaurant): static
     {
         $this->restaurant = $restaurant;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrderProduct>
+     */
+    public function getOrderProducts(): Collection
+    {
+        return $this->orderProducts;
+    }
+
+    public function addOrderProduct(OrderProduct $orderProduct): static
+    {
+        if (!$this->orderProducts->contains($orderProduct)) {
+            $this->orderProducts->add($orderProduct);
+            $orderProduct->setOrderId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderProduct(OrderProduct $orderProduct): static
+    {
+        if ($this->orderProducts->removeElement($orderProduct)) {
+            // set the owning side to null (unless already changed)
+            if ($orderProduct->getOrderId() === $this) {
+                $orderProduct->setOrderId(null);
+            }
+        }
 
         return $this;
     }

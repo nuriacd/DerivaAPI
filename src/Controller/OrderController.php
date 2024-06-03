@@ -2,8 +2,12 @@
 namespace App\Controller;
 
 use App\Entity\Order;
+use App\Entity\OrderProduct;
 use App\Entity\Product;
+use App\Entity\Restaurant;
+use App\Repository\OrderProductRepository;
 use App\Repository\OrderRepository;
+use App\Repository\RestaurantRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,7 +21,7 @@ class OrderController extends AbstractController
 {
 
     #[Route('/', name: 'app_order_index', methods: ['GET'])]
-    public function index(OrderRepository $orderRepository): JsonResponse
+    public function index(OrderRepository $orderRepository, OrderProductRepository $orderProductRepository): JsonResponse
     {
         $orders = $orderRepository->findAll();
 
@@ -25,15 +29,18 @@ class OrderController extends AbstractController
         {
             $orderList = [];
             foreach ($orders as $order) {
-                $orderList[] = $this->orderModel($order);
+                $orderList[] = $this->orderModel($order, $orderProductRepository);
             }
             return new JsonResponse($orderList, Response::HTTP_OK);
         }
         return new JsonResponse(['message' => 'No orders found.'], Response::HTTP_NOT_FOUND);
     }
 
-    private function orderModel(Order $order): array
+    private function orderModel(Order $order, OrderProductRepository $orderProductRepository): array
     {
+
+        $products = $orderProductRepository->findBy(['order_id' => $order]);
+
         return 
         [
             'id'  => $order->getId(),
@@ -41,9 +48,10 @@ class OrderController extends AbstractController
             'address'  => $order->getAddress(),
             'price'  => $order->getPrice(),
             'client'  => $order->getClient(),
-            'products'  => $order->getProducts(),
+            'products'  => $products,
             'date'  => $order->getDate(),
         ];
+
     }
 
     #[Route('/new', name: 'app_order_new', methods: ['POST'])]
@@ -56,6 +64,9 @@ class OrderController extends AbstractController
         $client = $data["client"];
         $products = $data["products"];
         $date = $data["date"];
+        $restaurant = $data["restaurant"];
+
+        $restaurant = $entityManager->getRepository(Restaurant::class)->find($restaurant);
 
         $order = new Order();
         $order->setStatus($status);
@@ -63,11 +74,7 @@ class OrderController extends AbstractController
         $order->setPrice($price);
         $order->setClient($client);
         $order->setDate($date);
-
-        foreach ($products as $stringProduct) {
-            $product = $entityManager->getRepository(Product::class)->find($stringProduct['id']);
-            $order->addProduct($product);
-        }
+        $order->setRestaurant($restaurant);
 
         $errors = $validator->validate($order);
         if (count($errors)  > 0) 
@@ -75,17 +82,42 @@ class OrderController extends AbstractController
         
         $entityManager->persist($order);
         $entityManager->flush();
+
+        foreach ($products as $stringProduct) {
+            $errors = $this->orderProductAdd($entityManager, $validator, $stringProduct, $order);
+
+            if ($errors > 0) 
+                return new JsonResponse(['message' => (string) $errors], Response::HTTP_BAD_REQUEST);
+            
+            $entityManager->persist($order);
+            $entityManager->flush();
+        }
+
         return new JsonResponse (['message' => 'Order created successfully'], Response::HTTP_CREATED);
     }
 
+    private function orderProductAdd(EntityManagerInterface $entityManager, ValidatorInterface $validator, string $stringProduct, Order $order): int 
+    {
+        $product = $entityManager->getRepository(Product::class)->find($stringProduct['id']);
+
+        $orderProduct = new OrderProduct();
+        $orderProduct->setProductId($product);
+        $orderProduct->setOrderId($order);
+
+        $orderProduct->setQuantity($stringProduct["quantity"]);
+        $errors = $validator->validate($orderProduct);
+
+        return count($errors);
+    }
+
     #[Route('/{id}', name: 'app_order_show', methods: ['GET'])]
-    public function show(EntityManagerInterface $entityManager, string $id): Response
+    public function show(EntityManagerInterface $entityManager, string $id, OrderProductRepository $orderProductRepository): Response
     {
         $order = $entityManager->getRepository(Order::class)->findOneBy(['id' => $id]);
         if (!$order)
             return new JsonResponse(['message' => 'Order not found'], Response::HTTP_NOT_FOUND);
         
-        $order = $this->orderModel($order);
+        $order = $this->orderModel($order, $orderProductRepository);
         return new JsonResponse($order, Response::HTTP_OK);
     }
 
@@ -110,16 +142,27 @@ class OrderController extends AbstractController
         $order->setClient($client);
         $order->setDate($date);
 
-        foreach ($products as $stringProduct) {
-            $product = $entityManager->getRepository(Product::class)->find($stringProduct['id']);
-            $order->addProduct($product);
+        $errors = $validator->validate($order);
+        if (count($errors)  > 0) 
+            return new JsonResponse(['message' => (string) $errors], Response::HTTP_BAD_REQUEST);
+
+        foreach ($order->getOrderProducts() as $product) {
+            $order->removeOrderProduct($product);
         }
 
-        $errors = $validator->validate($order);
-        if (count($errors)  > 0)
-            return new JsonResponse(['message' => (string) $errors], Response::HTTP_BAD_REQUEST);
-        
+        $entityManager->persist($order);
         $entityManager->flush();
+
+        foreach ($products as $stringProduct) {
+            $errors = $this->orderProductAdd($entityManager, $validator, $stringProduct, $order);
+
+            if ($errors > 0) 
+                return new JsonResponse(['message' => (string) $errors], Response::HTTP_BAD_REQUEST);
+            
+            $entityManager->persist($order);
+            $entityManager->flush();
+        }
+
         return new JsonResponse (['message' => 'Order updated successfully'], Response::HTTP_OK);
     }
     
@@ -156,7 +199,7 @@ class OrderController extends AbstractController
     }
 
     #[Route('/pending', name: 'app_order_pending', methods: ['GET'])]
-    public function getPendingOrders(OrderRepository $orderRepository): JsonResponse
+    public function getPendingOrders(OrderRepository $orderRepository, OrderProductRepository $orderProductRepository): JsonResponse
     {
         $orders = $orderRepository->findBy(['status' => 'pending']);
 
@@ -164,7 +207,7 @@ class OrderController extends AbstractController
         {
             $orderList = [];
             foreach ($orders as $order) {
-                $orderList[] = $this->orderModel($order);
+                $orderList[] = $this->orderModel($order, $orderProductRepository);
             }
             return new JsonResponse($orderList, Response::HTTP_OK);
         }
@@ -172,7 +215,7 @@ class OrderController extends AbstractController
     }
 
     #[Route('/restaurant/{id}', name: 'app_order_restaurant', methods: ['GET'])]
-    public function getRestaurantOrders(OrderRepository $orderRepository, $id): JsonResponse
+    public function getRestaurantOrders(OrderRepository $orderRepository, $id, OrderProductRepository $orderProductRepository): JsonResponse
     {
         $orders = $orderRepository->findBy(['restaurant' => $id]);
 
@@ -180,12 +223,26 @@ class OrderController extends AbstractController
         {
             $orderList = [];
             foreach ($orders as $order) {
-                $orderList[] = $this->orderModel($order);
+                $orderList[] = $this->orderModel($order, $orderProductRepository);
             }
             return new JsonResponse($orderList, Response::HTTP_OK);
         }
+
         return new JsonResponse(['message' => 'No orders found for this restaurant.'], Response::HTTP_NOT_FOUND);
     }
 
+    #[Route('/restaurant/{id}/can-deliver', name: 'app_order_can_deliver', methods: ['POST'])]
+    public function canDeliver(Request $request, RestaurantRepository $restaurantRepository, $id): JsonResponse
+    {
+        $data = json_decode($request->getContent(),true);
+        $city = $data["city"];
+        
+        $restaurant = $restaurantRepository->find($id);
 
+        if ($restaurant && $restaurant->getDeliveryCity() === $city) {
+            return new JsonResponse(['message' => 'Delivery is possible in your city.'], Response::HTTP_OK);
+        }
+
+        return new JsonResponse(['message' => 'Delivery is not possible in your city.'], Response::HTTP_NOT_FOUND);
+    }
 }
