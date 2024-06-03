@@ -20,94 +20,37 @@ class Restaurant
     #[ORM\Column(length: 50)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $address = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $latitude = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $longitude = null;
-
-    #[ORM\Column]
-    private ?int $radius = null;
-
     /**
      * @var Collection<int, Employee>
      */
     #[ORM\OneToMany(targetEntity: Employee::class, mappedBy: 'restaurant')]
     private Collection $employees;
 
-    /**
-     * @var Collection<int, Drink>
-     */
-    #[ORM\ManyToMany(targetEntity: Drink::class)]
-    private Collection $drinks;
+    #[ORM\Column(length: 255)]
+    private ?string $deliveryCity = null;
 
     /**
-     * @var Collection<int, Ingredient>
+     * @var Collection<int, RestaurantIngredient>
      */
-    #[ORM\ManyToMany(targetEntity: Ingredient::class)]
-    private Collection $ingredients;
+    #[ORM\OneToMany(targetEntity: RestaurantIngredient::class, mappedBy: 'restaurant_id', orphanRemoval: true)]
+    private Collection $ingridients;
+
+    /**
+     * @var Collection<int, RestaurantDrink>
+     */
+    #[ORM\OneToMany(targetEntity: RestaurantDrink::class, mappedBy: 'restaurant_id', orphanRemoval: true)]
+    private Collection $drinks;
 
     public function __construct()
     {
         $this->employees = new ArrayCollection();
+        $this->ingridients = new ArrayCollection();
         $this->drinks = new ArrayCollection();
-        $this->ingredients = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getAddress(): ?string
-    {
-        return $this->address;
-    }
-
-    public function setAddress(string $address): static
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    public function getLatitude(): ?string
-    {
-        return $this->latitude;
-    }
-
-    public function setLatitude(string $latitude): static
-    {
-        $this->latitude = $latitude;
-
-        return $this;
-    }
-
-    public function getLongitude(): ?string
-    {
-        return $this->longitude;
-    }
-
-    public function setLongitude(string $longitude): static
-    {
-        $this->longitude = $longitude;
-
-        return $this;
-    }
-
-    public function getRadius(): ?int
-    {
-        return $this->radius;
-    }
-
-    public function setRadius(int $radius): static
-    {
-        $this->radius = $radius;
-
-        return $this;
     }
 
     /**
@@ -140,54 +83,6 @@ class Restaurant
         return $this;
     }
 
-    /**
-     * @return Collection<int, Drink>
-     */
-    public function getDrinks(): Collection
-    {
-        return $this->drinks;
-    }
-
-    public function addDrink(Drink $drink): static
-    {
-        if (!$this->drinks->contains($drink)) {
-            $this->drinks->add($drink);
-        }
-
-        return $this;
-    }
-
-    public function removeDrink(Drink $drink): static
-    {
-        $this->drinks->removeElement($drink);
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Ingredient>
-     */
-    public function getIngredients(): Collection
-    {
-        return $this->ingredients;
-    }
-
-    public function addIngredient(Ingredient $ingredient): static
-    {
-        if (!$this->ingredients->contains($ingredient)) {
-            $this->ingredients->add($ingredient);
-        }
-
-        return $this;
-    }
-
-    public function removeIngredient(Ingredient $ingredient): static
-    {
-        $this->ingredients->removeElement($ingredient);
-
-        return $this;
-    }
-
     public function getName(): ?string
     {
         return $this->name;
@@ -196,6 +91,78 @@ class Restaurant
     public function setName(string $name): static
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getDeliveryCity(): ?string
+    {
+        return $this->deliveryCity;
+    }
+
+    public function setDeliveryCity(string $deliveryCity): static
+    {
+        $this->deliveryCity = $deliveryCity;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RestaurantIngredient>
+     */
+    public function getIngridients(): Collection
+    {
+        return $this->ingridients;
+    }
+
+    public function addIngridient(RestaurantIngredient $ingridient): static
+    {
+        if (!$this->ingridients->contains($ingridient)) {
+            $this->ingridients->add($ingridient);
+            $ingridient->setRestaurantId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIngridient(RestaurantIngredient $ingridient): static
+    {
+        if ($this->ingridients->removeElement($ingridient)) {
+            // set the owning side to null (unless already changed)
+            if ($ingridient->getRestaurantId() === $this) {
+                $ingridient->setRestaurantId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RestaurantDrink>
+     */
+    public function getDrinks(): Collection
+    {
+        return $this->drinks;
+    }
+
+    public function addDrink(RestaurantDrink $drink): static
+    {
+        if (!$this->drinks->contains($drink)) {
+            $this->drinks->add($drink);
+            $drink->setRestaurantId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDrink(RestaurantDrink $drink): static
+    {
+        if ($this->drinks->removeElement($drink)) {
+            // set the owning side to null (unless already changed)
+            if ($drink->getRestaurantId() === $this) {
+                $drink->setRestaurantId(null);
+            }
+        }
 
         return $this;
     }
