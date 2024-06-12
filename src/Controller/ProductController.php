@@ -4,6 +4,8 @@ namespace App\Controller;
 use App\Entity\Dish;
 use App\Entity\Drink;
 use App\Entity\Product;
+use App\Entity\Restaurant;
+use App\Entity\RestaurantDrink;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -188,12 +190,23 @@ class ProductController extends AbstractController
 
         $dishesArray = [];
         foreach ($dishes as $dish) {
+            $ingredients = [];
+            foreach($dish->getIngredients() as $ingredient) {
+                $ingredients[] = [
+                    'id' => $ingredient->getId(),
+                    'name' => $ingredient->getName(),
+                    'allergen' => $ingredient->getAllergen(),
+                ];
+            }
+
             $dishesArray[] = [
                 'id' => $dish->getId(),
                 'name' => $dish->getName(),
                 'price' => $dish->getPrice(),
                 'description' => $dish->getDescription(),
                 'type' => $dish->getType(),
+                'recipe' => $dish->getRecipe(),
+                'ingredients' => $ingredients,
                 'image' => $this->generateImageUrl($dish->getImage()),
             ];
         }
@@ -201,6 +214,63 @@ class ProductController extends AbstractController
         return new JsonResponse($dishesArray, Response::HTTP_OK);
     }
 
- 
+    #[Route('/drink/restaurant/{restaurantId}', name: 'app_restaurant_drink_list', methods: ['GET'])]
+    public function listRestaurantDrinks(int $restaurantId, EntityManagerInterface $entityManager): Response
+    {
+        $allDrinks = $entityManager->getRepository(Drink::class)->findAll();
+        $restaurantDrinks = $entityManager->getRepository(RestaurantDrink::class)->findBy(['restaurant_id' => $restaurantId]);
+    
+        $restaurantDrinksMap = [];
+        foreach ($restaurantDrinks as $restaurantIngredient) {
+            $restaurantDrinksMap[$restaurantIngredient->getDrinkId()->getId()] = $restaurantIngredient->getQuantity();
+        }
+    
+        $drinksList = [];
+        foreach ($allDrinks as $drink) {
+            $drinkId = $drink->getId();
+            $drinksList[] = [
+                'id' => $drink->getId(),
+                'name' => $drink->getName(),
+                'price' => $drink->getPrice(),
+                'description' => $drink->getDescription(),
+                'quantity' => $restaurantDrinksMap[$drinkId] ?? 0,
+            ];
+        }
+    
+        return new JsonResponse($drinksList, Response::HTTP_OK);
+    }
+
+    #[Route('/drink/restaurant/{restaurantId}/update', name: 'app_restaurant_drink_update', methods: ['PUT'])]
+    public function updateRestaurantDrink(int $restaurantId, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $drinkId = $data['drinkId'];
+        $quantity = $data['quantity'];
+
+        $restaurantId = $entityManager->getRepository(Restaurant::class)->find($restaurantId);
+        $drinkId = $entityManager->getRepository(Drink::class)->find($drinkId);
+
+        // Buscar el ingrediente del restaurante específico
+        $restaurantDrink = $entityManager->getRepository(RestaurantDrink::class)->findOneBy([
+            'restaurant_id' => $restaurantId,
+            'drink_id' => $drinkId,
+        ]);
+
+        if (!$restaurantDrink) {
+            // Si el ingrediente no existe para el restaurante, crear uno nuevo
+            $restaurantDrink = new RestaurantDrink();
+            $restaurantDrink->setRestaurantId($restaurantId);
+            $restaurantDrink->setDrinkId($drinkId);
+            $restaurantDrink->setQuantity($quantity);
+            $entityManager->persist($restaurantDrink);
+        } else {
+            // Si el ingrediente ya existe, actualizar la cantidad
+            $restaurantDrink->setQuantity($quantity);
+        }
+
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'Ingredient quantity updated successfully'], Response::HTTP_OK);
+    }
     
 }

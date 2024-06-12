@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Client;
 use App\Entity\Employee;
+use App\Entity\Restaurant;
 use App\Entity\User;
 use App\Repository\ClientRepository;
 use App\Repository\EmployeeRepository;
@@ -64,7 +65,7 @@ class UserController extends AbstractController
             'email'  => $user->getEmail(),
             'phone'  => $user->getPhone(),
             'type' => $user->getType(),
-            'restaurant' => $user->getRestaurant() ? $user->getRestaurant()->getName() : 'Sin localización'
+            'restaurant' => $user->getRestaurant()->getId(),
         ];
     }
 
@@ -106,7 +107,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/new', name: 'app_user_new', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): JsonResponse
+    public function new(JWTTokenManagerInterface $JWTManager, Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): JsonResponse
     {
         $data = json_decode($request->getContent(),true);
         $name = $data["name"]; $email = $data["email"]; $phone = $data["phone"]; $pwd = $data["password"]; $pwd2 = $data["password2"];
@@ -130,7 +131,8 @@ class UserController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
     
-            return new JsonResponse (['message' => 'User created successfully'], Response::HTTP_CREATED);
+            $token = $JWTManager->create($user);  
+            return new JsonResponse(['token' => $token], Response::HTTP_OK);
         }
 
         return new JsonResponse (['message' => 'Incorrect password and/or phone'], Response::HTTP_BAD_REQUEST);
@@ -144,6 +146,8 @@ class UserController extends AbstractController
         $name = $data["name"]; $email = $data["email"]; $phone = $data["phone"]; $pwd = $data["password"]; $pwd2 = $data["password2"];
         $type = "employee";
 
+        $restaurant = $entityManager->getRepository(Restaurant::class)->findOneBy(['name' => $data["restaurant"]]);
+
         $validPwd = $this->checkPwd($pwd, $pwd2);
         $validPhone = $this->checkPhone($phone);
 
@@ -155,9 +159,10 @@ class UserController extends AbstractController
             $employee->setEmail($email);
             $employee->setPhone($phone);
             $employee->setType($type);
+            $employee->setRoles(['ROLE_EMPLOYEE']);
+            $employee->setRestaurant($restaurant);
 
             $employee->setPassword($this->hashPwd($passwordHasher, $pwd, $employee));
-            $employee->setRoles(['ROLE_EMPLOYEE']);
 
             $errors = $validator->validate($employee);
             if (count($errors)  > 0) 
@@ -205,7 +210,7 @@ class UserController extends AbstractController
     #[Route('/{id}/get', name: 'app_user_show', methods: ['GET'])]
     public function show(EntityManagerInterface $entityManager, string $id): Response
     {
-        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $id]);
+        $user = $entityManager->getRepository(User::class)->find($id);
 
         if (!$user)
             return new JsonResponse(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
@@ -225,7 +230,7 @@ class UserController extends AbstractController
         $data = json_decode($request->getContent(),true);
         $name = $data["name"]; $email = $data["email"]; $phone = $data["phone"];
 
-        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $id]);
+        $user = $entityManager->getRepository(User::class)->find($id);
 
         if (!$user)
             return new JsonResponse(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
@@ -256,7 +261,7 @@ class UserController extends AbstractController
         $data = json_decode($request->getContent(),true);
         $pwd = $data["pwd"]; $pwd2 = $data["pwd2"];
 
-        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $id]);
+        $user = $entityManager->getRepository(User::class)->find($id);
         
         if (!$user)
             return new JsonResponse(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
@@ -282,7 +287,7 @@ class UserController extends AbstractController
     #[Route('/{id}/delete', name: 'app_user_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, $id): JsonResponse
     {
-        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $id]);
+        $user = $entityManager->getRepository(User::class)->find($id);
 
         if (!$user)
             return new JsonResponse(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
@@ -316,7 +321,7 @@ class UserController extends AbstractController
         $data = json_decode($request->getContent(), true);
         $password = $data["password"];
 
-        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $id]);
+        $user = $entityManager->getRepository(User::class)->find($id);
 
         if ($user && $passwordHasher->isPasswordValid($user, $password)) 
             return new JsonResponse (['message' => 'Correct credentials'], Response::HTTP_OK);

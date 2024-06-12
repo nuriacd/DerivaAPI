@@ -18,11 +18,11 @@ class RestaurantDrink
 
     #[ORM\ManyToOne(inversedBy: 'drinks')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?restaurant $restaurant_id = null;
+    private ?Restaurant $restaurant_id = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?drink $drink_id = null;
+    private ?Drink $drink_id = null;
 
     public function getId(): ?int
     {
@@ -41,24 +41,24 @@ class RestaurantDrink
         return $this;
     }
 
-    public function getRestaurantId(): ?restaurant
+    public function getRestaurantId(): ?Restaurant
     {
         return $this->restaurant_id;
     }
 
-    public function setRestaurantId(?restaurant $restaurant_id): static
+    public function setRestaurantId(?Restaurant $restaurant_id): static
     {
         $this->restaurant_id = $restaurant_id;
 
         return $this;
     }
 
-    public function getDrinkId(): ?drink
+    public function getDrinkId(): ?Drink
     {
         return $this->drink_id;
     }
 
-    public function setDrinkId(?drink $drink_id): static
+    public function setDrinkId(?Drink $drink_id): static
     {
         $this->drink_id = $drink_id;
 

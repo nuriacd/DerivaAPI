@@ -13,13 +13,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/restaurant')]
 class RestaurantController extends AbstractController
 {
-    private $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
-    }
-
     #[Route('/', name: 'app_restaurant_index', methods: ['GET'])]
     public function index(RestaurantRepository $restaurantRepository): JsonResponse
     {
@@ -112,11 +105,24 @@ class RestaurantController extends AbstractController
         return new JsonResponse(['message' => 'Restaurant deleted successfully'], Response::HTTP_OK);
     }
 
-    public function getRestaurant(string $id): Restaurant | bool
+    public function getRestaurant(EntityManagerInterface $entityManager, string $id): Restaurant | bool
     {
-        $restaurant = $this->entityManager->getRepository(Restaurant::class)->findOneBy(['name' => $id]);
+        $restaurant = $entityManager->getRepository(Restaurant::class)->findOneBy(['name' => $id]);
 
         return $restaurant ? $restaurant : false;
         
+    }
+
+    #[Route('/delivery/{city}', name: 'app_restaurant_by_delivery_city', methods: ['GET'])]
+    public function getRestaurantByDeliveryCity(RestaurantRepository $restaurantRepository, string $city): JsonResponse
+    {
+        $restaurant = $restaurantRepository->findOneBy(['deliveryCity' => $city]);
+
+        if ($restaurant) {
+            $id = $restaurant->getId();
+            return new JsonResponse(['id' => $id], Response::HTTP_OK);
+        }
+
+        return new JsonResponse(['message' => 'No restaurants found in the specified delivery city.'], Response::HTTP_NOT_FOUND);
     }
 }
