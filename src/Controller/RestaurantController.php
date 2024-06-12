@@ -70,6 +70,17 @@ class RestaurantController extends AbstractController
         return new JsonResponse($restaurant, Response::HTTP_OK);
     }
 
+    #[Route('/name/{id}', name: 'app_restaurant_name', methods: ['GET'])]
+    public function getName(EntityManagerInterface $entityManager, string $id): Response
+    {
+        $restaurant = $entityManager->getRepository(Restaurant::class)->find($id);
+        if (!$restaurant)
+            return new JsonResponse(['message' => 'Restaurant not found'], Response::HTTP_NOT_FOUND);
+        
+        $restaurant = $restaurant->getName();
+        return new JsonResponse($restaurant, Response::HTTP_OK);
+    }
+
     #[Route('/{id}/edit', name: 'app_restaurant_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, string $id): JsonResponse
     {

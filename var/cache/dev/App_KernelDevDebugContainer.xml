@@ -362,7 +362,7 @@
     </service>
     <service id="argument_resolver.service" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\ServiceValueResolver">
       <tag priority="-50" name="Symfony\Component\HttpKernel\Controller\ArgumentResolver\ServiceValueResolver">controller.argument_value_resolver</tag>
-      <argument type="service" id=".service_locator.uVAurCV"/>
+      <argument type="service" id=".service_locator.4316EHQ"/>
     </service>
     <service id="argument_resolver.default" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DefaultValueResolver">
       <tag priority="-100" name="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DefaultValueResolver">controller.argument_value_resolver</tag>
@@ -1729,7 +1729,7 @@
     </service>
     <service id="argument_resolver.not_tagged_controller" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\NotTaggedControllerValueResolver">
       <tag name="controller.argument_value_resolver" priority="-200"/>
-      <argument type="service" id=".service_locator.uVAurCV"/>
+      <argument type="service" id=".service_locator.4316EHQ"/>
     </service>
     <service id="routing.resolver" class="Symfony\Component\Config\Loader\LoaderResolver">
       <call method="addLoader">
@@ -4915,7 +4915,7 @@
         <argument key="passwordHasher" type="service_closure" id="security.user_password_hasher"/>
       </argument>
     </service>
-    <service id=".service_locator.uVAurCV" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.4316EHQ" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="App\Controller\ContactController::sendContactEmail" type="service_closure" id=".service_locator.uVvF4gL"/>
@@ -4950,6 +4950,7 @@
         <argument key="App\Controller\ProductController::updateRestaurantDrink" type="service_closure" id=".service_locator.CsMkqUa"/>
         <argument key="App\Controller\RestaurantController::delete" type="service_closure" id=".service_locator.CsMkqUa"/>
         <argument key="App\Controller\RestaurantController::edit" type="service_closure" id=".service_locator.gxkSA7l"/>
+        <argument key="App\Controller\RestaurantController::getName" type="service_closure" id=".service_locator.CsMkqUa"/>
         <argument key="App\Controller\RestaurantController::getRestaurant" type="service_closure" id=".service_locator.CsMkqUa"/>
         <argument key="App\Controller\RestaurantController::getRestaurantByDeliveryCity" type="service_closure" id=".service_locator.XdnbiXt"/>
         <argument key="App\Controller\RestaurantController::index" type="service_closure" id=".service_locator.XdnbiXt"/>
@@ -5002,6 +5003,7 @@
         <argument key="App\Controller\ProductController:updateRestaurantDrink" type="service_closure" id=".service_locator.CsMkqUa"/>
         <argument key="App\Controller\RestaurantController:delete" type="service_closure" id=".service_locator.CsMkqUa"/>
         <argument key="App\Controller\RestaurantController:edit" type="service_closure" id=".service_locator.gxkSA7l"/>
+        <argument key="App\Controller\RestaurantController:getName" type="service_closure" id=".service_locator.CsMkqUa"/>
         <argument key="App\Controller\RestaurantController:getRestaurant" type="service_closure" id=".service_locator.CsMkqUa"/>
         <argument key="App\Controller\RestaurantController:getRestaurantByDeliveryCity" type="service_closure" id=".service_locator.XdnbiXt"/>
         <argument key="App\Controller\RestaurantController:index" type="service_closure" id=".service_locator.XdnbiXt"/>
@@ -6351,7 +6353,7 @@
     <service id="Symfony\Component\Mime\BodyRendererInterface" alias="twig.mime_body_renderer"/>
     <service id="container.env_var_processors_locator" alias=".service_locator.bJ.4HC5" public="true"/>
     <service id="twig.loader.filesystem" alias="twig.loader.native_filesystem"/>
-    <service id="argument_resolver.controller_locator" alias=".service_locator.uVAurCV"/>
+    <service id="argument_resolver.controller_locator" alias=".service_locator.4316EHQ"/>
     <service id="doctrine.id_generator_locator" alias=".service_locator.KLVvNIq"/>
     <service id="twig.loader" alias="twig.loader.native_filesystem"/>
     <service id="Psr\Log\LoggerInterface" alias="logger"/>

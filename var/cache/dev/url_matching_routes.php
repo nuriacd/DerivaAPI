@@ -77,21 +77,22 @@ return [
                     .')'
                 .')'
                 .'|/restaurant/(?'
+                    .'|([^/]++)(*:505)'
+                    .'|name/([^/]++)(*:526)'
                     .'|([^/]++)(?'
-                        .'|(*:508)'
-                        .'|/edit(*:521)'
-                        .'|(*:529)'
+                        .'|/edit(*:550)'
+                        .'|(*:558)'
                     .')'
-                    .'|delivery/([^/]++)(*:555)'
+                    .'|delivery/([^/]++)(*:584)'
                 .')'
                 .'|/user/([^/]++)/(?'
-                    .'|get(*:585)'
+                    .'|get(*:614)'
                     .'|edit(?'
-                        .'|(*:600)'
-                        .'|Pwd(*:611)'
+                        .'|(*:629)'
+                        .'|Pwd(*:640)'
                     .')'
-                    .'|delete(*:626)'
-                    .'|checkPwd(*:642)'
+                    .'|delete(*:655)'
+                    .'|checkPwd(*:671)'
                 .')'
             .')/?$}sDu',
     ],
@@ -118,15 +119,16 @@ return [
         420 => [[['_route' => 'app_product_delete', '_controller' => 'App\\Controller\\ProductController::delete'], ['id'], ['DELETE' => 0], null, false, true, null]],
         457 => [[['_route' => 'app_restaurant_drink_list', '_controller' => 'App\\Controller\\ProductController::listRestaurantDrinks'], ['restaurantId'], ['GET' => 0], null, false, true, null]],
         472 => [[['_route' => 'app_restaurant_drink_update', '_controller' => 'App\\Controller\\ProductController::updateRestaurantDrink'], ['restaurantId'], ['PUT' => 0], null, false, false, null]],
-        508 => [[['_route' => 'app_restaurant_show', '_controller' => 'App\\Controller\\RestaurantController::show'], ['id'], ['GET' => 0], null, false, true, null]],
-        521 => [[['_route' => 'app_restaurant_edit', '_controller' => 'App\\Controller\\RestaurantController::edit'], ['id'], ['PUT' => 0], null, false, false, null]],
-        529 => [[['_route' => 'app_restaurant_delete', '_controller' => 'App\\Controller\\RestaurantController::delete'], ['id'], ['DELETE' => 0], null, false, true, null]],
-        555 => [[['_route' => 'app_restaurant_by_delivery_city', '_controller' => 'App\\Controller\\RestaurantController::getRestaurantByDeliveryCity'], ['city'], ['GET' => 0], null, false, true, null]],
-        585 => [[['_route' => 'app_user_show', '_controller' => 'App\\Controller\\UserController::show'], ['id'], ['GET' => 0], null, false, false, null]],
-        600 => [[['_route' => 'app_user_edit', '_controller' => 'App\\Controller\\UserController::edit'], ['id'], ['PUT' => 0], null, false, false, null]],
-        611 => [[['_route' => 'app_pwd_edit', '_controller' => 'App\\Controller\\UserController::editPwd'], ['id'], ['PUT' => 0], null, false, false, null]],
-        626 => [[['_route' => 'app_user_delete', '_controller' => 'App\\Controller\\UserController::delete'], ['id'], ['DELETE' => 0], null, false, false, null]],
-        642 => [
+        505 => [[['_route' => 'app_restaurant_show', '_controller' => 'App\\Controller\\RestaurantController::show'], ['id'], ['GET' => 0], null, false, true, null]],
+        526 => [[['_route' => 'app_restaurant_name', '_controller' => 'App\\Controller\\RestaurantController::getName'], ['id'], ['GET' => 0], null, false, true, null]],
+        550 => [[['_route' => 'app_restaurant_edit', '_controller' => 'App\\Controller\\RestaurantController::edit'], ['id'], ['PUT' => 0], null, false, false, null]],
+        558 => [[['_route' => 'app_restaurant_delete', '_controller' => 'App\\Controller\\RestaurantController::delete'], ['id'], ['DELETE' => 0], null, false, true, null]],
+        584 => [[['_route' => 'app_restaurant_by_delivery_city', '_controller' => 'App\\Controller\\RestaurantController::getRestaurantByDeliveryCity'], ['city'], ['GET' => 0], null, false, true, null]],
+        614 => [[['_route' => 'app_user_show', '_controller' => 'App\\Controller\\UserController::show'], ['id'], ['GET' => 0], null, false, false, null]],
+        629 => [[['_route' => 'app_user_edit', '_controller' => 'App\\Controller\\UserController::edit'], ['id'], ['PUT' => 0], null, false, false, null]],
+        640 => [[['_route' => 'app_pwd_edit', '_controller' => 'App\\Controller\\UserController::editPwd'], ['id'], ['PUT' => 0], null, false, false, null]],
+        655 => [[['_route' => 'app_user_delete', '_controller' => 'App\\Controller\\UserController::delete'], ['id'], ['DELETE' => 0], null, false, false, null]],
+        671 => [
             [['_route' => 'app_user_checkPwd', '_controller' => 'App\\Controller\\UserController::checkPassword'], ['id'], ['POST' => 0], null, false, false, null],
             [null, null, null, null, false, false, 0],
         ],

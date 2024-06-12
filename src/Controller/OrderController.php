@@ -80,7 +80,7 @@ class OrderController extends AbstractController
         $status = $data["status"];
         $address = $data["address"];
         $price = $data["price"];
-        $client =  $entityManager->getRepository(Client::class)->findOneBy(['email' => $data['client']]);
+        $client =  $entityManager->getRepository(Client::class)->find($data['client']);
         $products = $data["products"];
         $date = new DateTime($data["date"]);
         $restaurant = $entityManager->getRepository(Restaurant::class)->find($data['restaurant']);
@@ -316,9 +316,9 @@ class OrderController extends AbstractController
     public function getUserOrders(OrderRepository $orderRepository, EntityManagerInterface $entityManager, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(),true);
-        $email = $data["email"];
+        $id = $data["id"];
 
-        $client = $entityManager->getRepository(Client::class)->findOneBy(['email' => $email]);
+        $client = $entityManager->getRepository(Client::class)->find($id);
         $orders = $orderRepository->findBy(['client' => $client]);
 
         if (count($orders) > 0) 
